@@ -1,0 +1,92 @@
+{% extends "newsapp/base.html" %}
+{% load static %}
+{% block content %}
+<style type="text/css">
+	a, a:hover{outline:none!important;}
+    section{padding: 30px 0; float: left; width: 100%}
+    .card{float: left; width:100%}
+    .navbar {border: medium none; float: left; margin-bottom: 0px; width: 100%;  border-radius: 0}
+    .title-small { color: #141517; font-size: 16px; font-weight: 400; line-height: 23px; margin: 6px 0 0;}
+    .title-small a{color: inherit}
+
+    {% if articles %}
+    .banner-sec{float: left; width: 100%; background: #EBEBEB}
+    {% endif %}
+
+    .card-text{margin: 0}
+    .text-time{color: #ff0000; font-weight: 600;}
+    .banner-sec .card-img-overlay{padding: 0; top: 3px; left: 7px; height: 20%}
+    .banner-sec{float: left; width:100%;}
+    .banner-sec .card{margin-bottom:20px;}
+</style>
+<div class="container">
+    <section class="banner-sec">
+        <div class="container">
+            <div class="row">
+                {% if articles %}
+                <div class="col-md-3" id="row_1">                    
+                </div>
+                <div class="col-md-3" id="row_2">
+                </div>
+                <div class="col-md-3" id="row_3">
+                </div>
+                <div class="col-md-3" id="row_4"> 
+                </div>
+                {% else %}
+                <div class="jumbotron">
+                    <h2>Welcome to the UKNews. Use the <code>Browse Articles</code> to find articles.</h2>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+</div>
+</section>
+</div>
+<script type="text/javascript">
+	{% if articles %}
+	var column_number = 1;
+		{% for article in articles %}
+			var article_box = `<div class="card">
+                        <div class="card-img-overlay"> <span class="badge badge-pill badge-danger">{{article.article_category}}</span> </div>
+                        <div class="card-body">
+                            <div class="news-title">
+                                <h2 class=" title-small"><a href="{% url 'newsapp:article_page' article.id %}">{{article.article_name}}</a></h2>
+                            </div>
+                            <p class="card-text"><small class="text-time"><em>{{article.article_created_time}}</em></small></p>
+                            <a href="#" onclick="like_article({{article.id}})" id="article_like_counter_{{article.id}}">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-hand-thumbs-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/> </svg>
+                            	<i > ({{article.article_likes.count}})</i>
+                            </a>
+                        </div>
+                    </div>`;
+            $( "#row_"+column_number ).append( article_box );
+            column_number = column_number + 1;
+            if (column_number == 5) {
+            	column_number = 1;
+            }
+		{% endfor %}
+	{% endif %}
+
+	function like_article(article_id) {
+		$.ajax({
+			url: '{% url "newsapp:like_article" %}',
+			data: {
+				'article_id': article_id
+			},
+			dataType: 'json',
+			success: function (response) {
+                if (response.hasOwnProperty('message')) {
+                    alert(response.message);
+                    return;
+                }
+                
+				var article = eval(response.article)[0];
+
+				var likes_count = article.fields.article_likes.length;
+				
+				$('#article_like_counter_'+article_id).html('<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-hand-thumbs-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/> </svg><i> ('+likes_count+')</i>');
+			}
+		});
+	}
+</script>
+{% endblock %}

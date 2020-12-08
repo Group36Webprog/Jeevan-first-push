@@ -1,0 +1,155 @@
+{% extends "newsapp/base.html" %}
+{% load static %}
+{% block content %}
+<style type="text/css">
+	body{margin-top:20px;text-align:left}.main-body{padding:15px}.card{box-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px 0 rgba(0,0,0,.06)}.card{position:relative;display:flex;flex-direction:column;min-width:0;word-wrap:break-word;background-color:#fff;background-clip:border-box;border:0 solid rgba(0,0,0,.125);border-radius:.25rem}.card-body{flex:1 1 auto;min-height:1px;padding:1rem}.gutters-sm{margin-right:-8px;margin-left:-8px}.gutters-sm>.col,.gutters-sm>[class*=col-]{padding-right:8px;padding-left:8px}.mb-3,.my-3{margin-bottom:1rem!important}.bg-gray-300{background-color:#e2e8f0}.h-100{height:100%!important}.shadow-none{box-shadow:none!important}
+</style>
+<div class="container">
+    <div class="main-body">
+    	<br>
+          <!-- /Breadcrumb -->
+    
+          <div class="row gutters-sm">
+            <div class="col-md-4 mb-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex flex-column align-items-center text-center">
+                  	{% if request.user.profile.picture %}
+                  		<img id="picture" src="{{ request.user.profile.picture.url }}" onerror="default_image()" class="rounded-circle" width="150">
+                  	{% else %}
+                  		<img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="150">
+                  	{% endif %}
+                    
+                    <div class="mt-3">
+                      <h4>{{profile.user.get_full_name}}</h4>
+                      <div class="form-group">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label class="btn btn-danger" for="my-file-selector">
+           <span class="glyphicon glyphicon-paperclip"></span>&nbsp;&nbsp;
+           <input id="my-file-selector" name="my-file-selector" type="file" style="display:none" onchange="$('#upload-file-info').html(this.files[0].name)"> Choose a Profile Picture
+        </label>
+        <span class='label label-info' id="upload-file-info"></span>
+        <div class="inner" style="display: inline-block;">
+          <button type="submit" class="btn btn-success" >Upload Picture</button>
+        </div>
+        <input type="text" name="new_picture" hidden>
+      </form>
+     </div>
+     <form method="post">
+       {% csrf_token %}
+       <input type="text" name="delete_picture" hidden>
+       <div class="inner" style="display: inline-block;">
+          <button type="submit" class="btn btn-danger" >Delete Picture</button>
+        </div>
+     </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">First Name</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{profile.user.first_name}}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">Last Name</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{profile.user.last_name}}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">E-Mail</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{profile.user.email}}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">Date-of-Birth</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{profile.date_of_birth}}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">Favourite Category</h6>
+                    </div>
+                    {% if profile.favourite_category %}
+                    <div class="col-sm-9 text-secondary">
+                      {{profile.favourite_category}}
+                    </div>
+                    {% else %}
+                    	<b>N/A</b>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div>
+              	<br><p>Update favourite category.</p>
+              	<select multiple data-style="bg-white rounded-pill px-4 py-3 shadow-sm " class="selectpicker w-100" id="all-categories">
+            </select>
+            <div class="inner" style="display: inline-block;">
+          <button onclick="update_categories()" type="submit" class="btn btn-success" >Update my new categories</button>
+        </div>
+          </div>
+          </div>
+      </div>
+  </div>
+</div>
+<script type="text/javascript">
+  function default_image() {
+    document.getElementById('picture').src = 'https://bootdey.com/img/Content/avatar/avatar7.png';
+  }
+
+	$.ajax({
+	  url: '{% url "newsapp:get_distinct_categories" %}',
+	  dataType: 'json',
+	  success: function (response) {
+	    for (var i = 0; i < response.unique_categories.length; i++) {
+	        var category_url = '<option>'+response.unique_categories[i]+'</option>';
+	        
+	        $( "#all-categories" ).append( category_url );
+	    }
+	  }
+	});
+
+	function update_categories() {
+		var new_categories = $('#all-categories').val();
+		console.log(new_categories);
+
+		if (new_categories.length<=0) {
+			alert("Select categories before updating!");
+			return;
+		}
+
+		$.ajax({
+	      url: '{% url "newsapp:update_categories" %}',
+	      data: {
+	        'new_categories': new_categories
+	      },
+	      dataType: 'json',
+	      success: function (response) {
+	        alert(response.message);
+	      }
+	    });
+		// body...
+	}
+</script>
+{% endblock %}

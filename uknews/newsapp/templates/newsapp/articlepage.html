@@ -1,0 +1,179 @@
+{% extends "newsapp/base.html" %} {% load static %} {% block content %}
+<style type="text/css">
+    .comment-wrapper .panel-body {
+        max-height: 650px;
+        overflow: auto;
+    }
+    
+    .comment-wrapper .media-list .media img {
+        width: 64px;
+        height: 64px;
+        border: 2px solid #e5e7e8;
+    }
+    
+    .comment-wrapper .media-list .media {
+        border-bottom: 1px dashed #efefef;
+        margin-bottom: 25px;
+    }
+</style>
+<div class="container">
+    <div class="jumbotron">
+        <h2 style="text-align: center;">{{ article.article_name }}</h2>
+    </div>
+    <div id="article-description">
+        <p>{{ article.article_description }}</p>
+    </div>
+    <br><br>
+    <div id="article-comments">
+        <div class="row bootstrap snippets bootdeys">
+            <div class="col-md-8 col-sm-12">
+                <div class="comment-wrapper">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h4>Comment panel</h4>
+                        </div>
+                        <div class="panel-body">
+                            <textarea class="form-control" placeholder="write a comment..." rows="3" id="comment-box"></textarea>
+                            <br>
+                            <button type="button" class="btn btn-info pull-right" onclick="create_comment()">Post</button>
+                            <div class="clearfix"></div>
+                            <hr>
+                            <ul class="media-list" id="list-of-article-comments">
+                                <!--  -->
+                                <!--  -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Edit your comment below.</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Message:</label>
+                        <textarea class="form-control" id="message-text-to-edit" rows="5"></textarea>
+                        <input type="text" id="comment_id_modal">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="update-comment-button">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function onloadcomments() {
+		alert();
+        {%
+            if all_comments %
+        } { %
+            for comment in all_comments %
+        }
+
+
+        if ("{{comment.user.email}}" == "{{ user.get_username }}") {
+            $('#list-of-article-comments').append(`<li id="comment_id_{{comment.id}}" class="media"> <div class="media-body"> <span class="text-muted pull-right"> <small class="text-muted">{{comment.comment_created_time}}</small> </span> <strong class="text-success">By {{comment.user.first_name}}</strong> <p id="comment_text_{{comment.id}}">{{comment.comment_text}}</p><button type='button' class='btn btn-danger' onclick='deletecomment({{comment.id}})'><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button>&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='btn btn-info' onclick='editcomment({{comment.id}})' data-toggle="modal" data-target="#exampleModalCenter"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg></button> </div></li>`);
+        } else {
+            $('#list-of-article-comments').append(`<li id="comment_id_{{comment.id}}" class="media"> <div class="media-body"> <span class="text-muted pull-right"> <small class="text-muted">{{comment.comment_created_time}}</small> </span> <strong class="text-success">By{{comment.user.first_name}}</strong> <p id="comment_text_{{comment.id}}">{{comment.comment_text}}</p></div></li>`);
+        }
+        //add reply button
+        $('#list-of-article-comments').append
+
+
+
+        { % endfor %
+        } { % endif %
+        }
+
+    }
+    onloadcomments();
+
+    function deletecomment(comment_id) {
+        $.ajax({
+            url: '{% url "newsapp:delete_comment" %}',
+            data: {
+                'comment_id': comment_id
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status == "OK") {
+                    $("#comment_id_" + comment_id).remove();
+                }
+            }
+        });
+    }
+
+    document.getElementById("update-comment-button").addEventListener("click", function() {
+        $('#exampleModalCenter').modal('hide');
+        var new_comment = $('textarea#message-text-to-edit').val();
+        var comment_id = $('input#comment_id_modal').val();
+
+        $.ajax({
+            url: '{% url "newsapp:edit_comment" %}',
+            dataType: 'json',
+            data: {
+                'new_comment': new_comment,
+                'comment_id': comment_id,
+            },
+            success: function(response) {
+                if (response.hasOwnProperty('message')) {
+                    alert(response.message);
+                    return;
+                }
+                var comment = eval(response.comment)[0].fields.comment_text;
+                $('p#comment_text_' + comment_id).text(comment);
+            }
+        });
+
+    })
+
+    function editcomment(comment_id) {
+        comment_text = $('p#comment_text_' + comment_id).text();
+        $("textarea#message-text-to-edit").val(comment_text);
+        $('#comment_id_modal').val(comment_id);
+    }
+
+
+    function create_comment() {
+        var comment = $('textarea#comment-box').val();
+
+        if (comment.trim().length < 1) {
+            alert("Enter something!")
+            return;
+        } else {
+            $('textarea#comment-box').val('');
+        }
+        $.ajax({
+            url: '{% url "newsapp:create_comment" %}',
+            dataType: 'json',
+            data: {
+                'comment': comment,
+                "article_id": "{{ article.id }}",
+            },
+            success: function(response) {
+                if (response.hasOwnProperty('message')) {
+                    alert(response.message);
+                    return;
+                }
+
+                var user = eval(response.user)[0].fields;
+                var comment = eval(response.comment)[0].fields;
+                var comment_pk = eval(response.comment)[0].pk;
+
+                $(`<li id="comment_id_` + comment_pk + `" class="media"> <div class="media-body"> <span class="text-muted pull-right"> <small class="text-muted">` + comment.comment_created_time + `</small> </span> <strong class="text-success">By ` + user.first_name + `</strong> <p id="comment_text_` + comment_pk + `">` + comment.comment_text + `</p><button type='button' class='btn btn-danger' onclick='deletecomment(` + comment_pk + `)'><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button>&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='btn btn-info' onclick='editcomment(` + comment_pk + `)' data-toggle="modal" data-target="#exampleModalCenter"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg></button> </div></li>`).prependTo("#list-of-article-comments"); //new comment comes at the top.
+            }
+        });
+    }
+</script>
+{% endblock %}
